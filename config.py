@@ -14,14 +14,14 @@ COINBASE_API_KEY = os.getenv("COINBASE_API_KEY_NAME")
 COINBASE_API_SECRET = os.getenv("COINBASE_API_SECRET")
 
 # Validate that environment variables are set
-if not COINBASE_API_KEY_NAME or not COINBASE_API_SECRET:
+if not COINBASE_API_KEY or not COINBASE_API_SECRET:
     # --- FIX: Update error message to reflect the new variable name ---
     raise ValueError(
         "Missing credentials. Ensure .env contains COINBASE_API_KEY_NAME and COINBASE_API_SECRET"
     )
 
 print("✅ Config loaded successfully")
-print(f"    API Key Name: {COINBASE_API_KEY_NAME}")
+print(f"    API Key Name: {COINBASE_API_KEY}")
 # --- FIX: Update print statement for the new variable ---
 print(f"    Private Key Preview: {COINBASE_API_SECRET[:50]}...")
 
