@@ -26,12 +26,3 @@ def test_connection():
 
 if __name__ == "__main__":
     test_connection()
-```
-
-## Step 5: Update `requirements.txt`
-```
-pandas>=2.0.0
-requests>=2.31.0
-numpy>=1.24.0
-python-dotenv>=1.0.0
-coinbase-advanced-py>=1.2.0
