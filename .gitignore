@@ -10,3 +10,8 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+
+
+cdp_api_key.json
+*.json
+
