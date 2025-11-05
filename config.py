@@ -37,9 +37,3 @@ if os.path.exists(COINBASE_PRIVATE_KEY_PATH):
         print(f"⚠️  Error reading key file: {e}")
 else:
     print(f"❌ Private key file NOT found at: {COINBASE_PRIVATE_KEY_PATH}")
-```
-
-Also, update your **`.env`** file. Use the `"id"` value from your JSON file:
-```
-COINBASE_API_KEY_NAME=your_id_value_from_json
-COINBASE_PRIVATE_KEY_PATH=F:\Projects\crypto-insight\cdp_api_key.json
