@@ -111,4 +111,26 @@ class CoinbaseTrader:
         """Place a market sell order (base_size is in terms of the base currency, e.g., BTC)"""
         try:
             # Type hint added for clarity that crypto_amount should be Decimal or convertible
-            print(f
+            print(f"⚠️  Placing market sell order: {crypto_amount:f} {product_id}")
+            order = self.client.market_order_sell(
+                product_id=product_id,
+                # Convert Decimal back to string for the API call
+                base_size=str(crypto_amount)
+            )
+            print("✅ Sell order placed successfully")
+            return order
+        except Exception as e:
+            print(f"❌ Error placing sell order: {e}")
+            return None
+
+# Example Usage (optional block you would run outside the class definition)
+# if __name__ == '__main__':
+#     # NOTE: The values in config.py must be set correctly for this to work.
+#     # COINBASE_API_KEY should be the Key Name (ID)
+#     # COINBASE_API_SECRET should be the Private Key (the full PEM string)
+#     trader = CoinbaseTrader()
+#     trader.get_accounts()
+#     trader.get_account_balance('USD')
+#     trader.get_product('BTC-USD')
+#     # Example of placing a market buy for $10 USD worth of BTC (assuming enough funds)
+#     # trader.market_buy('BTC-USD', Decimal('10'))
