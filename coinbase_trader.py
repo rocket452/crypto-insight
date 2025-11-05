@@ -12,8 +12,9 @@ class CoinbaseTrader:
         """Initialize with API credentials from environment"""
         self.client = RESTClient(
             api_key=COINBASE_API_KEY_NAME,
-            private_key=COINBASE_PRIVATE_KEY_PATH
+            api_secret=COINBASE_PRIVATE_KEY_PATH
         )
+
         print("✅ Connected to Coinbase CDP API")
     
     def get_accounts(self):
