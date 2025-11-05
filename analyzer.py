@@ -96,10 +96,3 @@ class CryptoAnalyzer:
             'sma_7': latest['sma_7'] if pd.notna(latest['sma_7']) else None,
             'sma_20': latest['sma_20'] if pd.notna(latest['sma_20']) else None
         }
-```
-
-## requirements.txt
-```
-pandas>=2.0.0
-requests>=2.31.0
-numpy>=1.24.0
