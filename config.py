@@ -31,6 +31,7 @@ if os.path.exists(COINBASE_PRIVATE_KEY_PATH):
             
             # Show first few characters of private key to verify format
             if 'privateKey' in key_data:
+                COINBASE_PRIVATE_KEY_PATH = key_data['privateKey']
                 pk_preview = key_data['privateKey'][:50]
                 print(f"   Private key starts with: {pk_preview}...")
     except Exception as e:
