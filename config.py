@@ -5,43 +5,49 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# --- FIX 1: Use consistent variable names for Coinbase Advanced Trade API ---
-# These variables should contain the Key Name (ID) and the path to the private key file.
-# We will use the common names: COINBASE_API_KEY_NAME and COINBASE_PRIVATE_KEY_PATH
-
+# Get API credentials for Coinbase Advanced Trade API
+# COINBASE_API_KEY_NAME is typically the Key ID (e.g., '1a2b3c4d')
 COINBASE_API_KEY_NAME = os.getenv("COINBASE_API_KEY_NAME")
-COINBASE_PRIVATE_KEY_PATH = os.getenv("COINBASE_PRIVATE_KEY_PATH")
 
-# --- FIX 2: Correct the validation block variable names ---
-# The original code was validating COINBASE_API_KEY_NAME and COINBASE_PRIVATE_KEY_PATH,
-# but it was only retrieving COINBASE_API_KEY and COINBASE_API_SECRET above.
-if not COINBASE_API_KEY_NAME or not COINBASE_PRIVATE_KEY_PATH:
+# --- FIX: Change variable name to COINBASE_API_SECRET ---
+# We now expect the raw private key content to be in the COINBASE_API_SECRET variable.
+COINBASE_API_SECRET = os.getenv("COINBASE_API_SECRET")
+
+# Validate that environment variables are set
+if not COINBASE_API_KEY_NAME or not COINBASE_API_SECRET:
+    # --- FIX: Update error message to reflect the new variable name ---
     raise ValueError(
-        "Missing credentials. Ensure .env contains COINBASE_API_KEY_NAME and COINBASE_PRIVATE_KEY_PATH"
+        "Missing credentials. Ensure .env contains COINBASE_API_KEY_NAME and COINBASE_API_SECRET"
     )
 
 print("✅ Config loaded successfully")
 print(f"    API Key Name: {COINBASE_API_KEY_NAME}")
-print(f"    Private Key Path: {COINBASE_PRIVATE_KEY_PATH}")
+# --- FIX: Update print statement for the new variable ---
+print(f"    Private Key Preview: {COINBASE_API_SECRET[:50]}...")
 
-# Load and verify the private key JSON file
-if not os.path.exists(COINBASE_PRIVATE_KEY_PATH):
-    raise FileNotFoundError(f"❌ Private key file not found at: {COINBASE_PRIVATE_KEY_PATH}")
+# --- REMOVE: The file loading logic is no longer needed since the key is loaded directly ---
+# The original code for loading and verifying the JSON file has been removed, 
+# as we assume COINBASE_API_SECRET now holds the raw PEM string.
 
-with open(COINBASE_PRIVATE_KEY_PATH, 'r') as f:
-    try:
-        key_data = json.load(f)
-    except json.JSONDecodeError:
-        raise ValueError("❌ Private key file is not valid JSON")
+# The final variable used for the Coinbase client will be COINBASE_API_SECRET.
+# If your COINBASE_API_SECRET variable contains the full JSON file content 
+# from the Advanced Trade API, you would need to parse it here:
 
-# Extract the PEM-encoded private key
-COINBASE_PRIVATE_KEY = key_data.get('privateKey')
-if not COINBASE_PRIVATE_KEY:
-    raise ValueError("❌ 'privateKey' not found in JSON file")
+try:
+    # Attempt to load the value as JSON, assuming the private key content 
+    # might be the full JSON object including the "privateKey" field.
+    key_data = json.loads(COINBASE_API_SECRET)
+    
+    # Extract the PEM-encoded private key from the JSON
+    # This assumes the value of COINBASE_API_SECRET in your .env is the full JSON payload
+    COINBASE_API_SECRET = key_data.get('privateKey')
+    
+    if not COINBASE_API_SECRET:
+        raise ValueError("❌ 'privateKey' not found in COINBASE_API_SECRET JSON data.")
 
-print("✅ Private key loaded successfully")
-# Note: Key ID is the name we loaded from the .env file (COINBASE_API_KEY_NAME),
-# but sometimes the key file itself also contains an 'id' or 'name'.
-# For clarity, we'll print the Key Name we loaded from the environment.
-print(f"    Key ID: {COINBASE_API_KEY_NAME}")
-print(f"    Private key preview: {COINBASE_PRIVATE_KEY[:50]}...")
+except json.JSONDecodeError:
+    # If it's not JSON, assume COINBASE_API_SECRET is already the raw PEM string.
+    # This is often simpler and better practice for .env files.
+    pass
+
+print("✅ Private key processed successfully")
