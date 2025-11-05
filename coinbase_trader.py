@@ -1,23 +1,23 @@
 from coinbase.rest import RESTClient
-from config import COINBASE_API_KEY_NAME, COINBASE_PRIVATE_KEY
+from config import COINBASE_API_KEY, COINBASE_API_SECRET
 
 class CoinbaseTrader:
-    """Execute trades on Coinbase using CDP API"""
+    """Execute trades on Coinbase using the Advanced Trade API"""
 
     def __init__(self):
         """Initialize with credentials loaded from config.py"""
         self.client = RESTClient(
-            api_key=COINBASE_API_KEY_NAME,
-            private_key=COINBASE_PRIVATE_KEY
+            api_key=COINBASE_API_KEY,
+            api_secret=COINBASE_API_SECRET
         )
-        print("✅ Connected to Coinbase CDP API")
+        print("✅ Connected to Coinbase Advanced Trade API")
 
     def get_accounts(self):
         """Retrieve all account balances"""
         try:
             accounts = self.client.get_accounts()
             print("\n💰 All Account Balances:")
-            for account in accounts.get('accounts', []):
+            for account in accounts['accounts']:
                 balance = float(account['available_balance']['value'])
                 currency = account['currency']
                 if balance > 0:
@@ -25,7 +25,6 @@ class CoinbaseTrader:
             return accounts
         except Exception as e:
             print(f"❌ Error getting accounts: {e}")
-            print("Are you sure your private key file is valid?")
             return None
 
     def get_account_balance(self, currency='USD'):
