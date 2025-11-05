@@ -3,6 +3,10 @@ from config import COINBASE_API_KEY_NAME, COINBASE_PRIVATE_KEY_PATH
 
 class CoinbaseTrader:
     """Execute trades on Coinbase using CDP API"""
+
+    print("🔑 Loaded credentials in coinbase_trader.py:")
+    print(f"   API Key Name: {COINBASE_API_KEY_NAME}")
+    print(f"   Private Key Path: {COINBASE_PRIVATE_KEY_PATH}")
     
     def __init__(self):
         """Initialize with API credentials from environment"""
