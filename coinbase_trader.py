@@ -6,6 +6,7 @@ from decimal import Decimal, InvalidOperation
 # Assuming 'from config import COINBASE_API_KEY, COINBASE_API_SECRET' is correct
 # and COINBASE_API_KEY and COINBASE_API_SECRET are correctly imported
 from coinbase.rest import RESTClient
+from coinbase import CDPClient
 from config import COINBASE_API_KEY, COINBASE_API_SECRET # Keep this line as per the original
 
 class CoinbaseTrader:
