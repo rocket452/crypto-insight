@@ -1,24 +1,19 @@
 from coinbase.rest import RESTClient
-from config import COINBASE_API_KEY_NAME, COINBASE_PRIVATE_KEY_PATH
+from config import COINBASE_API_KEY_NAME, COINBASE_PRIVATE_KEY
 
 class CoinbaseTrader:
     """Execute trades on Coinbase using CDP API"""
 
-    print("🔑 Loaded credentials in coinbase_trader.py:")
-    print(f"   API Key Name: {COINBASE_API_KEY_NAME}")
-    print(f"   Private Key Path: {COINBASE_PRIVATE_KEY_PATH}")
-    
     def __init__(self):
-        """Initialize with API credentials from environment"""
+        """Initialize with credentials loaded from config.py"""
         self.client = RESTClient(
             api_key=COINBASE_API_KEY_NAME,
-            api_secret=COINBASE_PRIVATE_KEY_PATH
+            private_key=COINBASE_PRIVATE_KEY
         )
-
         print("✅ Connected to Coinbase CDP API")
-    
+
     def get_accounts(self):
-        """Get all account balances"""
+        """Retrieve all account balances"""
         try:
             accounts = self.client.get_accounts()
             print("\n💰 All Account Balances:")
@@ -30,10 +25,11 @@ class CoinbaseTrader:
             return accounts
         except Exception as e:
             print(f"❌ Error getting accounts: {e}")
+            print("Are you sure your private key file is valid?")
             return None
-    
+
     def get_account_balance(self, currency='USD'):
-        """Get account balance for a specific currency"""
+        """Retrieve balance for a specific currency"""
         try:
             accounts = self.client.get_accounts()
             for account in accounts.get('accounts', []):
@@ -46,9 +42,9 @@ class CoinbaseTrader:
         except Exception as e:
             print(f"❌ Error getting {currency} balance: {e}")
             return None
-    
+
     def get_product(self, product_id='BTC-USD'):
-        """Get product information including current price"""
+        """Retrieve current market info for a product"""
         try:
             product = self.client.get_product(product_id)
             price = float(product['price'])
@@ -57,38 +53,30 @@ class CoinbaseTrader:
         except Exception as e:
             print(f"❌ Error getting {product_id}: {e}")
             return None
-    
+
     def market_buy(self, product_id, usd_amount):
-        """
-        Place a market buy order
-        product_id: e.g., 'BTC-USD', 'ETH-USD'
-        usd_amount: amount in USD to spend
-        """
+        """Place a market buy order"""
         try:
             print(f"⚠️  Placing buy order: ${usd_amount} of {product_id}")
             order = self.client.market_order_buy(
                 product_id=product_id,
                 quote_size=str(usd_amount)
             )
-            print(f"✅ Buy order placed successfully")
+            print("✅ Buy order placed successfully")
             return order
         except Exception as e:
             print(f"❌ Error placing buy order: {e}")
             return None
-    
+
     def market_sell(self, product_id, crypto_amount):
-        """
-        Place a market sell order
-        product_id: e.g., 'BTC-USD'
-        crypto_amount: amount of crypto to sell
-        """
+        """Place a market sell order"""
         try:
             print(f"⚠️  Placing sell order: {crypto_amount} {product_id}")
             order = self.client.market_order_sell(
                 product_id=product_id,
                 base_size=str(crypto_amount)
             )
-            print(f"✅ Sell order placed successfully")
+            print("✅ Sell order placed successfully")
             return order
         except Exception as e:
             print(f"❌ Error placing sell order: {e}")
