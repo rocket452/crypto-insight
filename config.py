@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get API credentials for Coinbase CDP API
-COINBASE_API_KEY_NAME = os.getenv('COINBASE_API_KEY_NAME')
-COINBASE_PRIVATE_KEY_PATH = os.getenv('COINBASE_PRIVATE_KEY_PATH')
+COINBASE_API_KEY = os.getenv("COINBASE_API_KEY")
+COINBASE_API_SECRET = os.getenv("COINBASE_API_SECRET")
 
 # Validate that environment variables are set
 if not COINBASE_API_KEY_NAME or not COINBASE_PRIVATE_KEY_PATH:
