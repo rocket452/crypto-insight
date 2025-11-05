@@ -6,21 +6,23 @@ def test_connection():
     
     trader = CoinbaseTrader()
     
-    # Get account balances
-    print("\n--- Account Balances ---")
+    # Get all account balances
+    print("\n--- All Account Balances ---")
+    trader.get_all_accounts()
+    
+    # Get specific balances
+    print("\n--- Specific Balances ---")
     trader.get_account_balance('USD')
-    trader.get_crypto_balance('BTC')
-    trader.get_crypto_balance('ETH')
+    trader.get_account_balance('BTC')
+    trader.get_account_balance('ETH')
     
     # Get current prices
-    print("\n--- Current Prices ---")
-    btc_price = trader.get_product_price('BTC-USD')
-    if btc_price:
-        print(f"BTC Price: ${btc_price:,.2f}")
+    print("\n--- Current Spot Prices ---")
+    trader.get_spot_price('BTC-USD')
+    trader.get_spot_price('ETH-USD')
+    trader.get_spot_price('SOL-USD')
     
-    eth_price = trader.get_product_price('ETH-USD')
-    if eth_price:
-        print(f"ETH Price: ${eth_price:,.2f}")
+    print("\n✅ Test complete!")
 
 if __name__ == "__main__":
     test_connection()
