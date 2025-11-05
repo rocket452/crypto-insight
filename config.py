@@ -7,7 +7,7 @@ load_dotenv()
 
 # Get API credentials for Coinbase Advanced Trade API
 # COINBASE_API_KEY_NAME is typically the Key ID (e.g., '1a2b3c4d')
-COINBASE_API_KEY_NAME = os.getenv("COINBASE_API_KEY_NAME")
+COINBASE_API_KEY = os.getenv("COINBASE_API_KEY_NAME")
 
 # --- FIX: Change variable name to COINBASE_API_SECRET ---
 # We now expect the raw private key content to be in the COINBASE_API_SECRET variable.
