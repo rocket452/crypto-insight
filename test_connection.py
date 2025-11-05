@@ -1,14 +1,14 @@
 from coinbase_trader import CoinbaseTrader
 
 def test_connection():
-    """Test Coinbase API connection"""
-    print("Testing Coinbase connection...\n")
+    """Test Coinbase CDP API connection"""
+    print("Testing Coinbase CDP API connection...\n")
     
     trader = CoinbaseTrader()
     
     # Get all account balances
     print("\n--- All Account Balances ---")
-    trader.get_all_accounts()
+    trader.get_accounts()
     
     # Get specific balances
     print("\n--- Specific Balances ---")
@@ -17,12 +17,21 @@ def test_connection():
     trader.get_account_balance('ETH')
     
     # Get current prices
-    print("\n--- Current Spot Prices ---")
-    trader.get_spot_price('BTC-USD')
-    trader.get_spot_price('ETH-USD')
-    trader.get_spot_price('SOL-USD')
+    print("\n--- Current Prices ---")
+    trader.get_product('BTC-USD')
+    trader.get_product('ETH-USD')
+    trader.get_product('SOL-USD')
     
     print("\n✅ Test complete!")
 
 if __name__ == "__main__":
     test_connection()
+```
+
+## Step 5: Update `requirements.txt`
+```
+pandas>=2.0.0
+requests>=2.31.0
+numpy>=1.24.0
+python-dotenv>=1.0.0
+coinbase-advanced-py>=1.2.0
