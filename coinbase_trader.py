@@ -15,10 +15,15 @@ class CoinbaseTrader:
         """Initialize with credentials loaded from config.py"""
         # Ensure your COINBASE_API_KEY and COINBASE_API_SECRET are the KEY_NAME and PRIVATE_KEY
         # from the previous fixation if you are using the Advanced Trade API.
-        self.client = RESTClient(
-            api_key=COINBASE_API_KEY,
-            api_secret=COINBASE_API_SECRET
-        )
+ #       self.client = RESTClient(
+#            api_key=COINBASE_API_KEY,
+ #           api_secret=COINBASE_API_SECRET
+   #     )
+
+self.client = CDPClient(
+    api_key_name=COINBASE_API_KEY,
+    private_key=COINBASE_API_SECRET
+)
         print("✅ Connected to Coinbase Advanced Trade API")
 
     # --- FIX 1: Use Decimal for balances for precision ---
