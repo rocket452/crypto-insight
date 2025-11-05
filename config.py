@@ -1,4 +1,5 @@
 import os
+import json
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -21,12 +22,24 @@ print(f"   Private Key Path: {COINBASE_PRIVATE_KEY_PATH}")
 if os.path.exists(COINBASE_PRIVATE_KEY_PATH):
     print(f"✅ Private key file found")
     try:
-        import json
         with open(COINBASE_PRIVATE_KEY_PATH, 'r') as f:
             key_data = json.load(f)
-            print(f"   Key name from file: {key_data.get('name', 'NOT FOUND')[:50]}...")
+            # CDP API uses "id" not "name"
+            key_id = key_data.get('id') or key_data.get('name')
+            print(f"   Key ID from file: {key_id[:50] if key_id else 'NOT FOUND'}...")
             print(f"   Private key present: {'Yes' if 'privateKey' in key_data else 'No'}")
+            
+            # Show first few characters of private key to verify format
+            if 'privateKey' in key_data:
+                pk_preview = key_data['privateKey'][:50]
+                print(f"   Private key starts with: {pk_preview}...")
     except Exception as e:
         print(f"⚠️  Error reading key file: {e}")
 else:
     print(f"❌ Private key file NOT found at: {COINBASE_PRIVATE_KEY_PATH}")
+```
+
+Also, update your **`.env`** file. Use the `"id"` value from your JSON file:
+```
+COINBASE_API_KEY_NAME=your_id_value_from_json
+COINBASE_PRIVATE_KEY_PATH=F:\Projects\crypto-insight\cdp_api_key.json
