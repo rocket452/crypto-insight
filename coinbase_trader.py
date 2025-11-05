@@ -19,11 +19,11 @@ class CoinbaseTrader:
 #            api_key=COINBASE_API_KEY,
  #           api_secret=COINBASE_API_SECRET
    #     )
-
-self.client = CDPClient(
-    api_key_name=COINBASE_API_KEY,
-    private_key=COINBASE_API_SECRET
-)
+        
+        self.client = CDPClient(
+            api_key_name=COINBASE_API_KEY,
+            private_key=COINBASE_API_SECRET
+        )
         print("✅ Connected to Coinbase Advanced Trade API")
 
     # --- FIX 1: Use Decimal for balances for precision ---
