@@ -7,6 +7,9 @@ from decimal import Decimal, InvalidOperation
 # and COINBASE_API_KEY (Key Name) and COINBASE_API_SECRET (Private Key Content) 
 # are correctly imported
 from coinbase.rest import RESTClient
+from cdp import CdpClient
+import asyncio
+from dotenv import load_dotenv
 # from coinbase.cdp import CDPClient # Removed, as it is not used
 from config import COINBASE_API_KEY, COINBASE_API_SECRET # Keep this line as per the original
 
@@ -15,21 +18,10 @@ class CoinbaseTrader:
 
     def __init__(self):
         """Initialize with credentials loaded from config.py"""
-        
-        # --- FIX: Revert to using the Advanced Trade RESTClient ---
-        # The methods used in this class (get_accounts, market_order_buy, etc.) 
-        # belong to the Advanced Trade / RESTClient interface.
-        # It requires the Key Name (API_KEY) and the Private Key content (API_SECRET).
-        self.client = RESTClient(
-            api_key=COINBASE_API_KEY,      # This is the Key Name/ID
-            api_secret=COINBASE_API_SECRET # This is the Private Key content (PEM string)
-        )
-        # The CDPClient initialization was wrong for the Advanced Trade API:
-        # self.client = CDPClient(
-        #    api_key_name=COINBASE_API_KEY,
-        #    private_key=COINBASE_API_SECRET
-        # )
-        
+        load_dotenv()
+        cdp = CdpClient()
+        await cdp.close()
+        asyncio.run(main())
         print("✅ Connected to Coinbase Advanced Trade API")
 
     # --- Methods below are already correct for RESTClient and Decimal handling ---
