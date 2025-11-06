@@ -3,6 +3,10 @@ import os
 from dotenv import load_dotenv
 import json
 
+import requests
+current_ip = requests.get('https://api.ipify.org').text
+print(f"Add this IP to your allowlist: {current_ip}/32")
+
 load_dotenv()
 
 API_KEY = os.environ.get('CDP_API_KEY_ID')
