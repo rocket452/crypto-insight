@@ -1,73 +1,47 @@
 from coinbase.rest import RESTClient
-import json
 import os
-from dotenv import load_dotenv  # Add this import
+from dotenv import load_dotenv
+import json
 
-print("=== LOADING ENVIRONMENT VARIABLES ===")
-
-# Load environment variables from .env file
-load_dotenv()  # Add this line - it loads the .env file
-
-# Now check if .env file was found
-env_path = '.env'
-if os.path.exists(env_path):
-    print(f"✅ .env file found at: {os.path.abspath(env_path)}")
-else:
-    print(f"❌ .env file NOT found at: {os.path.abspath(env_path)}")
-    print("Please make sure your .env file is in the same directory as your script")
+load_dotenv()
 
 API_KEY = os.environ.get('CDP_API_KEY_ID')
 API_SECRET = os.environ.get('CDP_API_KEY_SECRET')
 
-print(f"API Key retrieved: {'✅ SUCCESS' if API_KEY else '❌ FAILED'}")
-print(f"API Secret retrieved: {'✅ SUCCESS' if API_SECRET else '❌ FAILED'}")
+print("=== API KEY DIAGNOSTICS ===")
+print(f"API Key: {API_KEY}")
+print(f"Secret starts with: {API_SECRET[:50]}")
+print(f"Secret ends with: {API_SECRET[-50:]}")
+print(f"Secret contains BEGIN: {'BEGIN' in API_SECRET}")
+print(f"Secret contains END: {'END' in API_SECRET}")
 
-# Debug: Print all environment variables (be careful with this in shared environments)
-print("\n=== CHECKING ALL ENV VARIABLES ===")
-all_env_vars = os.environ
-for key, value in all_env_vars.items():
-    if 'API' in key or 'KEY' in key or 'SECRET' in key:
-        print(f"Found env var: {key} = {value[:8]}...")  # Only show first 8 chars for security
+# Check if it's a multi-line PEM in .env file
+if '\\n' in API_SECRET:
+    print("⚠️  Found \\n in secret - might need proper newlines")
+else:
+    print("✅ No \\n found in secret")
 
-if not API_KEY or not API_SECRET:
-    print("\n❌ ERROR: Missing API credentials.")
-    print("Possible solutions:")
-    print("1. Make sure your .env file is in the same directory as your script")
-    print("2. Check that variable names in .env match exactly: CDP_API_KEY_ID and CDP_API_KEY_SECRET")
-    print("3. Ensure .env file format is correct (no spaces around =)")
-    exit(1)
-
-print("\n=== .ENV FILE FORMAT EXAMPLE ===")
-print("Your .env file should look like this:")
-print("CDP_API_KEY_ID=your_actual_key_here")
-print("CDP_API_KEY_SECRET=your_actual_secret_here")
-print("(No quotes, no spaces around the = sign)")
-
-# Rest of your code continues...
-print("\n=== INITIALIZING CLIENT ===")
 try:
     client = RESTClient(api_key=API_KEY, api_secret=API_SECRET)
-    print("✅ Client initialized successfully")
-except Exception as e:
-    print(f"❌ Failed to initialize client: {e}")
-    exit(1)
-
-print("\n=== TESTING API CONNECTION ===")
-try:
+    print("✅ Client initialized")
+    
+    # Try a simple public endpoint first
+    print("\n=== TESTING PUBLIC ENDPOINT ===")
+    from coinbase.rest import RESTClient
+    public_client = RESTClient()  # No auth for public endpoints
+    currencies = public_client.get_currencies()
+    print("✅ Public API works - network connectivity is good")
+    
+    # Now test authenticated endpoint
+    print("\n=== TESTING AUTHENTICATED ENDPOINT ===")
     accounts = client.get_accounts()
-    print("✅ API connection successful")
-    print(f"✅ Received response with {len(accounts.get('accounts', []))} accounts")
+    print("✅ Authenticated API call successful!")
     
 except Exception as e:
-    print(f"❌ API call failed: {e}")
-    exit(1)
-
-print("\n=== ACCOUNT BALANCES ===")
-# Print all balances
-for account in accounts['accounts']:
-    balance = float(account['available_balance']['value'])
-    if balance > 0:
-        currency = account['available_balance']['currency']
-        print(f"✅ {currency}: {balance}")
-
-print("\n=== SCRIPT COMPLETE ===")
+    print(f"❌ Error: {e}")
+    if "401" in str(e):
+        print("\n🔍 401 Unauthorized - Common Solutions:")
+        print("1. Check API key PERMISSIONS in Coinbase Cloud")
+        print("2. Ensure key has 'View' permission enabled")
+        print("3. Verify organization/portfolio selection")
+        print("4. Check if key is activated (new keys may take 1-2 minutes)")
