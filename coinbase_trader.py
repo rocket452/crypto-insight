@@ -1,36 +1,38 @@
 import os
 import json
+import asyncio
 # Import Decimal for accurate financial calculations
 from decimal import Decimal, InvalidOperation
-
-# Assuming 'from config import COINBASE_API_KEY, COINBASE_API_SECRET' is correct
-# and COINBASE_API_KEY (Key Name) and COINBASE_API_SECRET (Private Key Content) 
-# are correctly imported
-from coinbase.rest import RESTClient
-from cdp import CdpClient
-import asyncio
 from dotenv import load_dotenv
-# from coinbase.cdp import CDPClient # Removed, as it is not used
-from config import COINBASE_API_KEY, COINBASE_API_SECRET # Keep this line as per the original
 
-class CoinbaseTrader:
-    """Execute trades on Coinbase using the Advanced Trade API"""
+# Coinbase Advanced Trade API client (RESTClient)
+from coinbase.rest import RESTClient 
 
+# Coinbase Developer Platform client (CdpClient) - Used for EVM/Solana features
+from cdp import CdpClient 
+
+# Assuming 'from config import COINBASE_API_KEY, COINBASE_API_SECRET' is correct.
+# COINBASE_API_KEY is the Key Name (ID), COINBASE_API_SECRET is the Private Key Content.
+from config import COINBASE_API_KEY, COINBASE_API_SECRET
+
+# Load environment variables from .env file (if used for other variables)
 load_dotenv()
 
-async def main():
-    # Initialize the CDP client, which automatically loads
-    # the API Key and Wallet Secret from the environment
-    # variables.
-    cdp = CdpClient()
-    await cdp.close()
+# --- Advanced Trade API Client Class ---
+# This class handles synchronous trading/balance operations using RESTClient.
+class CoinbaseTrader:
+    """Execute trades and retrieve balances on Coinbase using the Advanced Trade REST API."""
 
+    def __init__(self):
+        """Initializes the synchronous RESTClient."""
+        
+        # The COINBASE_API_SECRET must be the processed string with actual newlines (\n).
+        # Assuming the 'config' module has already handled the '.replace('\\n', '\n')' logic.
+        self.client = RESTClient(api_key=COINBASE_API_KEY, api_secret=COINBASE_API_SECRET)
+        
+        print("✅ Connected to Coinbase Advanced Trade API")
 
-asyncio.run(main())
- 
-print("✅ Connected to Coinbase Advanced Trade API")
-
-    # --- Methods below are already correct for RESTClient and Decimal handling ---
+    # --- Methods below are correctly formatted for RESTClient and Decimal handling ---
 
     def get_accounts(self):
         """Retrieve all account balances"""
@@ -123,3 +125,36 @@ print("✅ Connected to Coinbase Advanced Trade API")
         except Exception as e:
             print(f"❌ Error placing sell order: {e}")
             return None
+
+# --- Asynchronous CDP Client Logic (If needed) ---
+async def cdp_test():
+    """Initializes and tests the asynchronous CDP Client connection."""
+    try:
+        # Using a context manager ensures the client is closed automatically
+        async with CdpClient() as cdp:
+            print("✅ CDP Client connection successful.")
+            # Add actual CDP methods here if you intend to use them, e.g.:
+            # accounts = await cdp.evm.list_accounts()
+            # print(f"CDP EVM Accounts: {len(accounts.accounts)}")
+    except Exception as e:
+        print(f"❌ Error connecting to CDP: {e}")
+
+# --- Main Execution Flow ---
+def run_trader_tests():
+    """Synchronous test of the Advanced Trade API."""
+    print("\n--- Starting Advanced Trade API Tests ---")
+    trader = CoinbaseTrader()
+    
+    trader.get_accounts()
+    trader.get_account_balance('USD')
+    trader.get_product('BTC-USD')
+    trader.get_product('ETH-USD')
+    
+    print("\n--- Advanced Trade API Tests Complete ---")
+
+if __name__ == '__main__':
+    # Run the synchronous Advanced Trade API tests
+    run_trader_tests()
+    
+    # If you need to test the asynchronous CDP client, run it separately
+    # asyncio.run(cdp_test())
