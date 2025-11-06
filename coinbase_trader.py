@@ -16,13 +16,19 @@ from config import COINBASE_API_KEY, COINBASE_API_SECRET # Keep this line as per
 class CoinbaseTrader:
     """Execute trades on Coinbase using the Advanced Trade API"""
 
-    def __init__(self):
-        """Initialize with credentials loaded from config.py"""
-        load_dotenv()
-        cdp = CdpClient()
-        await cdp.close()
-        asyncio.run(main())
-        print("✅ Connected to Coinbase Advanced Trade API")
+load_dotenv()
+
+async def main():
+    # Initialize the CDP client, which automatically loads
+    # the API Key and Wallet Secret from the environment
+    # variables.
+    cdp = CdpClient()
+    await cdp.close()
+
+
+asyncio.run(main())
+ 
+print("✅ Connected to Coinbase Advanced Trade API")
 
     # --- Methods below are already correct for RESTClient and Decimal handling ---
 
