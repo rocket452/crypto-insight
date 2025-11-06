@@ -8,40 +8,42 @@ load_dotenv()
 API_KEY = os.environ.get('CDP_API_KEY_ID')
 API_SECRET = os.environ.get('CDP_API_KEY_SECRET')
 
-print("=== API KEY DIAGNOSTICS ===")
-print(f"API Key: {API_KEY}")
-print(f"Secret starts with: {API_SECRET[:50]}")
-print(f"Secret ends with: {API_SECRET[-50:]}")
-print(f"Secret contains BEGIN: {'BEGIN' in API_SECRET}")
-print(f"Secret contains END: {'END' in API_SECRET}")
-
-# Check if it's a multi-line PEM in .env file
+print("=== FIXING PEM FORMAT ===")
+# Replace \n with actual newlines
 if '\\n' in API_SECRET:
-    print("⚠️  Found \\n in secret - might need proper newlines")
-else:
-    print("✅ No \\n found in secret")
+    print("Converting \\n to actual newlines...")
+    API_SECRET = API_SECRET.replace('\\n', '\n')
+    print("✅ Fixed PEM format")
+
+print(f"Secret preview:\n{API_SECRET[:100]}...")
 
 try:
     client = RESTClient(api_key=API_KEY, api_secret=API_SECRET)
-    print("✅ Client initialized")
+    print("✅ Client initialized with fixed PEM")
     
-    # Try a simple public endpoint first
-    print("\n=== TESTING PUBLIC ENDPOINT ===")
-    from coinbase.rest import RESTClient
-    public_client = RESTClient()  # No auth for public endpoints
-    currencies = public_client.get_currencies()
-    print("✅ Public API works - network connectivity is good")
-    
-    # Now test authenticated endpoint
-    print("\n=== TESTING AUTHENTICATED ENDPOINT ===")
+    # Test the connection
+    print("\n=== TESTING CONNECTION ===")
     accounts = client.get_accounts()
-    print("✅ Authenticated API call successful!")
+    print("✅ API connection successful!")
+    print(f"Found {len(accounts['accounts'])} accounts")
     
+    # Show balances
+    print("\n=== ACCOUNT BALANCES ===")
+    for account in accounts['accounts']:
+        balance = float(account['available_balance']['value'])
+        currency = account['available_balance']['currency']
+        if balance > 0:
+            print(f"💰 {currency}: {balance}")
+        else:
+            print(f"💡 {currency}: 0")
+            
 except Exception as e:
     print(f"❌ Error: {e}")
+    
+    # Additional debug info
     if "401" in str(e):
-        print("\n🔍 401 Unauthorized - Common Solutions:")
-        print("1. Check API key PERMISSIONS in Coinbase Cloud")
-        print("2. Ensure key has 'View' permission enabled")
-        print("3. Verify organization/portfolio selection")
-        print("4. Check if key is activated (new keys may take 1-2 minutes)")
+        print("\n🔍 Still getting 401 - Let's check:")
+        print("1. Go to https://cloud.coinbase.com/access/api")
+        print("2. Verify your API key has 'View' permissions")
+        print("3. Check IP allowlist includes your current IP")
+        print("4. Ensure you selected the correct organization/portfolio")
