@@ -1,5 +1,6 @@
 from coinbase.rest import RESTClient
 import json
+import os
 
 API_KEY = os.environ.get('CDP_API_KEY_ID')
 API_SECRET = os.environ.get('CDP_API_KEY_SECRET')
