@@ -8,7 +8,7 @@ current_ip = requests.get('https://api.ipify.org').text
 print(f"🌐 Your current IPv4: {current_ip}")
 print(f"   Add to allowlist: {current_ip}/32")
 
- print("   testing IPv6")
+print("   testing IPv6")
 try:
     ipv6 = requests.get('https://api64.ipify.org').text
     if ':' in ipv6:  # It's actually IPv6
