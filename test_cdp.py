@@ -64,7 +64,7 @@ async def test_cdp():
             print(f"   Address: {account.address}")
         except Exception as e:
             print(f"❌ Error: {e}")
-            return  # Exit if account creation fails
+            return
         
         # Test 2: Get swap price (doesn't require funds)
         print("\n=== TEST 2: Get Swap Price ===")
@@ -82,9 +82,10 @@ async def test_cdp():
             # Convert from smallest unit (wei) to WETH
             to_amount_weth = float(swap_price.to_amount) / 1e18
             print(f"   To: {to_amount_weth:.6f} WETH")
-            print(f"   Liquidity available: {swap_price.liquidity_available}")
             
-            # Check if min_to_amount exists
+            # Check various attributes that might exist
+            if hasattr(swap_price, 'liquidity_available'):
+                print(f"   Liquidity available: {swap_price.liquidity_available}")
             if hasattr(swap_price, 'min_to_amount') and swap_price.min_to_amount:
                 min_amount_weth = float(swap_price.min_to_amount) / 1e18
                 print(f"   Min after slippage: {min_amount_weth:.6f} WETH")
@@ -96,20 +97,21 @@ async def test_cdp():
         print("\n=== TEST 3: List All Accounts ===")
         try:
             accounts_response = await cdp.evm.list_accounts()
-            # Access the accounts from the response
             accounts_list = accounts_response.accounts if hasattr(accounts_response, 'accounts') else []
             print(f"✅ Found {len(accounts_list)} CDP accounts")
-            for acc in accounts_list[:5]:  # Show first 5
+            for acc in accounts_list[:5]:
                 print(f"   - {acc.name}: {acc.address}")
         except Exception as e:
             print(f"❌ Error: {e}")
         
-        print("\n🎉 All tests complete!")
+        print("\n🎉 All tests complete! Your CDP connection is working!")
+        print("\n📌 Next steps:")
+        print("   1. Fund your account with USDC on Base")
+        print("   2. Execute actual swaps")
+        print("   3. Integrate with your crypto analysis tool")
 
 if __name__ == "__main__":
-    # Setup environment from JSON file
     if setup_environment():
-        # Run the async test
         asyncio.run(test_cdp())
     else:
         print("❌ Failed to setup environment")
