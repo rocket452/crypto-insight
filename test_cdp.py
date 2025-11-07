@@ -20,20 +20,20 @@ def setup_environment():
         data = json.load(f)
     
     # Extract values
-    api_key_name = data.get('id')
-    private_key = data.get('privateKey', '')
+    api_key_id = data.get('id')
+    api_key_secret = data.get('privateKey', '')
     
     # Replace \n with actual newlines if needed
-    if '\\n' in private_key:
-        private_key = private_key.replace('\\n', '\n')
+    if '\\n' in api_key_secret:
+        api_key_secret = api_key_secret.replace('\\n', '\n')
     
-    # Set environment variables
-    os.environ['CDP_API_KEY_NAME'] = api_key_name
-    os.environ['CDP_API_KEY_PRIVATE_KEY'] = private_key
+    # Set environment variables with the correct names
+    os.environ['CDP_API_KEY_ID'] = api_key_id
+    os.environ['CDP_API_KEY_SECRET'] = api_key_secret
     
-    print(f"✅ API Key Name: {api_key_name[:50]}...")
-    print(f"✅ Private Key loaded (length: {len(private_key)})")
-    print(f"   Starts with: {private_key[:30]}...")
+    print(f"✅ CDP_API_KEY_ID: {api_key_id[:50]}...")
+    print(f"✅ CDP_API_KEY_SECRET loaded (length: {len(api_key_secret)})")
+    print(f"   Starts with: {api_key_secret[:30]}...")
     print()
     
     return True
