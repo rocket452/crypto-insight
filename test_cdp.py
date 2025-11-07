@@ -53,12 +53,3 @@ async def test_cdp():
 
 if __name__ == "__main__":
     asyncio.run(test_cdp())
-```
-
-**Update your `requirements.txt`:**
-```
-pandas>=2.0.0
-requests>=2.31.0
-numpy>=1.24.0
-python-dotenv>=1.0.0
-cdp-sdk>=0.0.1
