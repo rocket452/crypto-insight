@@ -31,7 +31,7 @@ def setup_environment():
     os.environ['CDP_API_KEY_ID'] = api_key_id
     os.environ['CDP_API_KEY_SECRET'] = api_key_secret
     
-    # Get wallet secret from .env file (you'll need to add this)
+    # Get wallet secret from .env file
     load_dotenv()
     wallet_secret = os.getenv('CDP_WALLET_SECRET')
     
@@ -40,8 +40,6 @@ def setup_environment():
         print(f"✅ CDP_WALLET_SECRET loaded")
     else:
         print("⚠️  CDP_WALLET_SECRET not found in .env")
-        print("   You need to generate this from the CDP Portal")
-        print("   Go to: https://portal.cdp.coinbase.com/projects")
         return False
     
     print(f"✅ CDP_API_KEY_ID: {api_key_id[:50]}...")
@@ -81,21 +79,32 @@ async def test_cdp():
             
             print(f"✅ Swap price estimate:")
             print(f"   From: 1 USDC")
-            print(f"   To: {swap_price.to_amount} WETH")
-            print(f"   Min after slippage: {swap_price.min_to_amount} WETH")
+            # Convert from smallest unit (wei) to WETH
+            to_amount_weth = float(swap_price.to_amount) / 1e18
+            print(f"   To: {to_amount_weth:.6f} WETH")
             print(f"   Liquidity available: {swap_price.liquidity_available}")
+            
+            # Check if min_to_amount exists
+            if hasattr(swap_price, 'min_to_amount') and swap_price.min_to_amount:
+                min_amount_weth = float(swap_price.min_to_amount) / 1e18
+                print(f"   Min after slippage: {min_amount_weth:.6f} WETH")
+            
         except Exception as e:
             print(f"❌ Error: {e}")
         
         # Test 3: List all accounts
         print("\n=== TEST 3: List All Accounts ===")
         try:
-            accounts = await cdp.evm.list_accounts()
-            print(f"✅ Found {len(accounts)} CDP accounts")
-            for acc in accounts[:5]:  # Show first 5
+            accounts_response = await cdp.evm.list_accounts()
+            # Access the accounts from the response
+            accounts_list = accounts_response.accounts if hasattr(accounts_response, 'accounts') else []
+            print(f"✅ Found {len(accounts_list)} CDP accounts")
+            for acc in accounts_list[:5]:  # Show first 5
                 print(f"   - {acc.name}: {acc.address}")
         except Exception as e:
             print(f"❌ Error: {e}")
+        
+        print("\n🎉 All tests complete!")
 
 if __name__ == "__main__":
     # Setup environment from JSON file
