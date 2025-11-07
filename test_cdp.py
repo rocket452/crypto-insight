@@ -1,9 +1,42 @@
 import asyncio
 from cdp import CdpClient
 import os
+import json
 from dotenv import load_dotenv
 
-load_dotenv()
+# First, extract keys from JSON file and set them properly
+def setup_environment():
+    """Extract keys from cdp_api_key.json and set environment variables"""
+    print("=== Setting up environment ===")
+    
+    # Check if JSON file exists
+    json_path = 'cdp_api_key.json'
+    if not os.path.exists(json_path):
+        print(f"❌ {json_path} not found!")
+        return False
+    
+    # Read and parse JSON
+    with open(json_path, 'r') as f:
+        data = json.load(f)
+    
+    # Extract values
+    api_key_name = data.get('id')
+    private_key = data.get('privateKey', '')
+    
+    # Replace \n with actual newlines if needed
+    if '\\n' in private_key:
+        private_key = private_key.replace('\\n', '\n')
+    
+    # Set environment variables
+    os.environ['CDP_API_KEY_NAME'] = api_key_name
+    os.environ['CDP_API_KEY_PRIVATE_KEY'] = private_key
+    
+    print(f"✅ API Key Name: {api_key_name[:50]}...")
+    print(f"✅ Private Key loaded (length: {len(private_key)})")
+    print(f"   Starts with: {private_key[:30]}...")
+    print()
+    
+    return True
 
 async def test_cdp():
     print("=== Testing CDP Client ===\n")
@@ -21,6 +54,7 @@ async def test_cdp():
             print(f"   Address: {account.address}")
         except Exception as e:
             print(f"❌ Error: {e}")
+            return  # Exit if account creation fails
         
         # Test 2: Get swap price (doesn't require funds)
         print("\n=== TEST 2: Get Swap Price ===")
@@ -52,4 +86,9 @@ async def test_cdp():
             print(f"❌ Error: {e}")
 
 if __name__ == "__main__":
-    asyncio.run(test_cdp())
+    # Setup environment from JSON file
+    if setup_environment():
+        # Run the async test
+        asyncio.run(test_cdp())
+    else:
+        print("❌ Failed to setup environment")
