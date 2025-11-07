@@ -31,9 +31,21 @@ def setup_environment():
     os.environ['CDP_API_KEY_ID'] = api_key_id
     os.environ['CDP_API_KEY_SECRET'] = api_key_secret
     
+    # Get wallet secret from .env file (you'll need to add this)
+    load_dotenv()
+    wallet_secret = os.getenv('CDP_WALLET_SECRET')
+    
+    if wallet_secret:
+        os.environ['CDP_WALLET_SECRET'] = wallet_secret
+        print(f"✅ CDP_WALLET_SECRET loaded")
+    else:
+        print("⚠️  CDP_WALLET_SECRET not found in .env")
+        print("   You need to generate this from the CDP Portal")
+        print("   Go to: https://portal.cdp.coinbase.com/projects")
+        return False
+    
     print(f"✅ CDP_API_KEY_ID: {api_key_id[:50]}...")
     print(f"✅ CDP_API_KEY_SECRET loaded (length: {len(api_key_secret)})")
-    print(f"   Starts with: {api_key_secret[:30]}...")
     print()
     
     return True
