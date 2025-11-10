@@ -35,6 +35,10 @@ python -m venv venv
 
 # Activate virtual environment
 # On Windows:
+
+For Powershell:Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+
+
 venv\Scripts\activate
 # On Mac/Linux:
 source venv/bin/activate
