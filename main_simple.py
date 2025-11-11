@@ -1,4 +1,4 @@
-# main_simple.py
+# Your existing main file (the one you showed me originally)
 import asyncio
 from cdp import CdpClient
 import os
@@ -6,18 +6,58 @@ import json
 from dotenv import load_dotenv
 from datetime import datetime
 
-# Use the simple version (choose one):
-from simple_llm import SimpleTradingLLM  # Tiny downloaded model
-# from rule_based_ai import RuleBasedTradingAI  # OR: No download needed
+# ADD THIS IMPORT
+from simple_llm import SimpleTradingLLM
 
-# ... (keep your existing setup_environment function) ...
+# KEEP your existing setup_environment function exactly as is
+def setup_environment():
+    """Extract keys from cdp_api_key.json and set environment variables"""
+    print("=== Setting up environment ===")
+    
+    # Check if JSON file exists
+    json_path = 'cdp_api_key.json'
+    if not os.path.exists(json_path):
+        print(f"❌ {json_path} not found!")
+        return False
+    
+    # Read and parse JSON
+    with open(json_path, 'r') as f:
+        data = json.load(f)
+    
+    # Extract values
+    api_key_id = data.get('id')
+    api_key_secret = data.get('privateKey', '')
+    
+    # Replace \n with actual newlines if needed
+    if '\\n' in api_key_secret:
+        api_key_secret = api_key_secret.replace('\\n', '\n')
+    
+    # Set environment variables with the correct names
+    os.environ['CDP_API_KEY_ID'] = api_key_id
+    os.environ['CDP_API_KEY_SECRET'] = api_key_secret
+    
+    # Get wallet secret from .env file
+    load_dotenv()
+    wallet_secret = os.getenv('CDP_WALLET_SECRET')
+    
+    if wallet_secret:
+        os.environ['CDP_WALLET_SECRET'] = wallet_secret
+        print(f"✅ CDP_WALLET_SECRET loaded")
+    else:
+        print("⚠️  CDP_WALLET_SECRET not found in .env")
+        return False
+    
+    print(f"✅ CDP_API_KEY_ID: {api_key_id[:50]}...")
+    print(f"✅ CDP_API_KEY_SECRET loaded (length: {len(api_key_secret)})")
+    print()
+    
+    return True
 
+# ADD THIS NEW CLASS
 class SimpleTradingInsights:
     def __init__(self):
         self.technical_insights = []
-        # Choose one of these:
-        self.ai_advisor = SimpleTradingLLM()  # Small local model
-        # self.ai_advisor = RuleBasedTradingAI()  # OR: Rule-based only
+        self.ai_advisor = SimpleTradingLLM()  # This uses the local model
     
     def analyze_swap_opportunity(self, swap_data, from_token, to_token, from_amount):
         """Same technical analysis as before"""
@@ -52,8 +92,9 @@ class SimpleTradingInsights:
         """Get AI analysis - now synchronous and simple"""
         return self.ai_advisor.analyze_trading_situation(market_data, technical_insights)
 
-async def test_cdp_simple_ai():
-    print("🤖 Testing CDP with SIMPLE Local AI\n")
+# MODIFY your existing test_cdp function (or create new one)
+async def test_cdp_with_ai():
+    print("🤖 Testing CDP with Local AI Insights\n")
     
     insights_engine = SimpleTradingInsights()
     
@@ -103,18 +144,16 @@ async def test_cdp_simple_ai():
             print(f"  Model: {ai_analysis['model']}")
             print(f"\n  Analysis: {ai_analysis['summary']}")
             
-            if 'reasoning' in ai_analysis:
-                print(f"  Reasoning: {ai_analysis['reasoning']}")
-            
         except Exception as e:
             print(f"❌ Error: {e}")
             import traceback
             traceback.print_exc()
         
-        print("\n🎉 Simple AI analysis complete!")
+        print("\n🎉 AI analysis complete!")
 
+# UPDATE the main block at the bottom
 if __name__ == "__main__":
     if setup_environment():
-        asyncio.run(test_cdp_simple_ai())
+        asyncio.run(test_cdp_with_ai())  # Changed from test_cdp() to test_cdp_with_ai()
     else:
         print("❌ Failed to setup environment")
