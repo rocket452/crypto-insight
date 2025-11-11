@@ -1,12 +1,13 @@
-# Your existing main file (the one you showed me originally)
+# main_simple.py
 import asyncio
 from cdp import CdpClient
 import os
 import json
 from dotenv import load_dotenv
 from datetime import datetime
+from typing import Dict, List  # ADD THIS IMPORT
 
-# ADD THIS IMPORT
+# Use the simple version
 from simple_llm import SimpleTradingLLM
 
 # KEEP your existing setup_environment function exactly as is
@@ -53,7 +54,6 @@ def setup_environment():
     
     return True
 
-# ADD THIS NEW CLASS
 class SimpleTradingInsights:
     def __init__(self):
         self.technical_insights = []
@@ -92,7 +92,6 @@ class SimpleTradingInsights:
         """Get AI analysis - now synchronous and simple"""
         return self.ai_advisor.analyze_trading_situation(market_data, technical_insights)
 
-# MODIFY your existing test_cdp function (or create new one)
 async def test_cdp_with_ai():
     print("🤖 Testing CDP with Local AI Insights\n")
     
@@ -151,9 +150,8 @@ async def test_cdp_with_ai():
         
         print("\n🎉 AI analysis complete!")
 
-# UPDATE the main block at the bottom
 if __name__ == "__main__":
     if setup_environment():
-        asyncio.run(test_cdp_with_ai())  # Changed from test_cdp() to test_cdp_with_ai()
+        asyncio.run(test_cdp_with_ai())
     else:
         print("❌ Failed to setup environment")
