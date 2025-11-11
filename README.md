@@ -1,3 +1,6 @@
+<img width="1086" height="308" alt="image" src="https://github.com/user-attachments/assets/7c4dd93f-b6d4-404f-b65c-10613eb861d5" />
+
+
 # Crypto Investment Insights with CDP Trading
 
 An AI-powered cryptocurrency analysis tool that provides data-driven insights and can execute trades automatically via Coinbase Developer Platform (CDP).
