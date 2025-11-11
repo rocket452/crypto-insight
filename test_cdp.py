@@ -1,117 +1,166 @@
+# main.py
 import asyncio
 from cdp import CdpClient
 import os
 import json
 from dotenv import load_dotenv
+from datetime import datetime
+from local_llm import LocalTradingLLM  # Import our local LLM
 
-# First, extract keys from JSON file and set them properly
-def setup_environment():
-    """Extract keys from cdp_api_key.json and set environment variables"""
-    print("=== Setting up environment ===")
-    
-    # Check if JSON file exists
-    json_path = 'cdp_api_key.json'
-    if not os.path.exists(json_path):
-        print(f"❌ {json_path} not found!")
-        return False
-    
-    # Read and parse JSON
-    with open(json_path, 'r') as f:
-        data = json.load(f)
-    
-    # Extract values
-    api_key_id = data.get('id')
-    api_key_secret = data.get('privateKey', '')
-    
-    # Replace \n with actual newlines if needed
-    if '\\n' in api_key_secret:
-        api_key_secret = api_key_secret.replace('\\n', '\n')
-    
-    # Set environment variables with the correct names
-    os.environ['CDP_API_KEY_ID'] = api_key_id
-    os.environ['CDP_API_KEY_SECRET'] = api_key_secret
-    
-    # Get wallet secret from .env file
-    load_dotenv()
-    wallet_secret = os.getenv('CDP_WALLET_SECRET')
-    
-    if wallet_secret:
-        os.environ['CDP_WALLET_SECRET'] = wallet_secret
-        print(f"✅ CDP_WALLET_SECRET loaded")
-    else:
-        print("⚠️  CDP_WALLET_SECRET not found in .env")
-        return False
-    
-    print(f"✅ CDP_API_KEY_ID: {api_key_id[:50]}...")
-    print(f"✅ CDP_API_KEY_SECRET loaded (length: {len(api_key_secret)})")
-    print()
-    
-    return True
+# ... (keep your existing setup_environment function) ...
 
-async def test_cdp():
-    print("=== Testing CDP Client ===\n")
+class EnhancedTradingInsights:
+    def __init__(self):
+        self.technical_insights = []
+        self.llm_advisor = LocalTradingLLM(model="mistral")  # Use local model
     
-    # Create CDP client
+    def analyze_swap_opportunity(self, swap_data, from_token, to_token, from_amount):
+        """Enhanced analysis with more metrics for LLM"""
+        insights = []
+        
+        # Extract key metrics
+        to_amount = float(swap_data.to_amount) / 1e18
+        min_to_amount = float(swap_data.min_to_amount) / 1e18 if hasattr(swap_data, 'min_to_amount') and swap_data.min_to_amount else to_amount
+        
+        # Calculate metrics
+        implied_price = to_amount / (float(from_amount) / 1e6)
+        slippage = ((to_amount - min_to_amount) / to_amount * 100) if to_amount > 0 else 0
+        
+        # Generate detailed insights for LLM
+        if slippage < 0.5:
+            insights.append(f"Excellent liquidity conditions with only {slippage:.2f}% slippage")
+            liquidity_quality = "Excellent"
+        elif slippage > 2.0:
+            insights.append(f"High slippage warning: {slippage:.2f}% - consider smaller orders")
+            liquidity_quality = "Poor"
+        else:
+            insights.append(f"Moderate slippage: {slippage:.2f}% - acceptable for trading")
+            liquidity_quality = "Good"
+        
+        insights.append(f"Current swap rate: 1 {from_token} = {implied_price:.6f} {to_token}")
+        
+        # Volume assessment (simulated - you'd get real volume data)
+        volume_status = "High" if slippage < 1.0 else "Moderate"
+        insights.append(f"Market depth appears {volume_status.lower()}")
+        
+        return insights, {
+            "slippage": slippage,
+            "liquidity_quality": liquidity_quality,
+            "volume_status": volume_status,
+            "swap_rate": f"1 {from_token} = {implied_price:.6f} {to_token}"
+        }
+    
+    async def get_comprehensive_analysis(self, swap_data, from_token, to_token, from_amount):
+        """Get both technical and LLM analysis"""
+        
+        # Get technical insights
+        technical_insights, metrics = self.analyze_swap_opportunity(
+            swap_data, from_token, to_token, from_amount
+        )
+        
+        # Prepare market data for LLM
+        market_data = {
+            "pair": f"{from_token}/{to_token}",
+            "current_price": "N/A",  # You would get this from price feeds
+            "price_change_24h": "N/A", 
+            "swap_rate": metrics["swap_rate"],
+            "slippage": metrics["slippage"],
+            "liquidity_quality": metrics["liquidity_quality"],
+            "volume_status": metrics["volume_status"],
+            "trade_size": f"{float(from_amount) / 1e6} {from_token}"
+        }
+        
+        # Get LLM analysis
+        llm_analysis = await self.llm_advisor.analyze_trading_situation(
+            market_data, technical_insights
+        )
+        
+        return {
+            "technical_insights": technical_insights,
+            "metrics": metrics,
+            "llm_analysis": llm_analysis,
+            "timestamp": datetime.now().isoformat()
+        }
+
+async def test_cdp_with_local_llm():
+    print("🤖 Testing CDP Client with LOCAL LLM Insights\n")
+    
+    # Initialize enhanced insights generator
+    insights_engine = EnhancedTradingInsights()
+    
     async with CdpClient() as cdp:
         print("✅ CDP Client initialized\n")
         
-        # Test 1: Get or create an account
-        print("=== TEST 1: Get or Create Account ===")
+        # Get or create account
+        print("=== Getting Account ===")
         try:
             account = await cdp.evm.get_or_create_account(name="MyTestAccount")
-            print(f"✅ Account created/retrieved")
-            print(f"   Name: {account.name}")
-            print(f"   Address: {account.address}")
+            print(f"✅ Account: {account.address}")
         except Exception as e:
             print(f"❌ Error: {e}")
             return
         
-        # Test 2: Get swap price (doesn't require funds)
-        print("\n=== TEST 2: Get Swap Price ===")
+        # Test swap with local LLM insights
+        print("\n=== Generating Local LLM Trading Insights ===")
         try:
-            swap_price = await cdp.evm.get_swap_price(
-                from_token="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",  # USDC on Base
-                to_token="0x4200000000000000000000000000000000000006",     # WETH on Base
-                from_amount="1000000",  # 1 USDC (6 decimals)
+            # Define tokens
+            USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+            WETH_BASE = "0x4200000000000000000000000000000000000006"
+            from_amount = "1000000"  # 1 USDC
+            
+            print("🔄 Fetching swap data from CDP...")
+            swap_data = await cdp.evm.get_swap_price(
+                from_token=USDC_BASE,
+                to_token=WETH_BASE,
+                from_amount=from_amount,
                 network="base",
                 taker=account.address
             )
             
-            print(f"✅ Swap price estimate:")
-            print(f"   From: 1 USDC")
-            # Convert from smallest unit (wei) to WETH
-            to_amount_weth = float(swap_price.to_amount) / 1e18
-            print(f"   To: {to_amount_weth:.6f} WETH")
+            print("🧠 Analyzing with local LLM...")
+            analysis = await insights_engine.get_comprehensive_analysis(
+                swap_data, "USDC", "WETH", from_amount
+            )
             
-            # Check various attributes that might exist
-            if hasattr(swap_price, 'liquidity_available'):
-                print(f"   Liquidity available: {swap_price.liquidity_available}")
-            if hasattr(swap_price, 'min_to_amount') and swap_price.min_to_amount:
-                min_amount_weth = float(swap_price.min_to_amount) / 1e18
-                print(f"   Min after slippage: {min_amount_weth:.6f} WETH")
+            # Display results
+            print("\n" + "="*60)
+            print("📊 TRADING ANALYSIS REPORT")
+            print("="*60)
+            
+            print("\n🔧 TECHNICAL INSIGHTS:")
+            for insight in analysis["technical_insights"]:
+                print(f"  • {insight}")
+            
+            print(f"\n🤖 LOCAL LLM ANALYSIS (using {insights_engine.llm_advisor.model}):")
+            llm = analysis["llm_analysis"]
+            print(f"  Recommendation: {llm['recommendation']}")
+            print(f"  Confidence: {llm['confidence']}")
+            print(f"\n  Summary: {llm['summary']}")
+            
+            if llm['key_levels']:
+                print(f"\n  Key Levels:")
+                for level in llm['key_levels']:
+                    print(f"    • {level}")
+            
+            if llm['risks']:
+                print(f"\n  Risks:")
+                for risk in llm['risks']:
+                    print(f"    • {risk}")
+            
+            # Show raw LLM response for debugging
+            print(f"\n  Raw LLM Response:")
+            print(f"    {llm['raw_response'][:300]}...")
             
         except Exception as e:
             print(f"❌ Error: {e}")
+            import traceback
+            traceback.print_exc()
         
-        # Test 3: List all accounts
-        print("\n=== TEST 3: List All Accounts ===")
-        try:
-            accounts_response = await cdp.evm.list_accounts()
-            accounts_list = accounts_response.accounts if hasattr(accounts_response, 'accounts') else []
-            print(f"✅ Found {len(accounts_list)} CDP accounts")
-            for acc in accounts_list[:5]:
-                print(f"   - {acc.name}: {acc.address}")
-        except Exception as e:
-            print(f"❌ Error: {e}")
-        
-        print("\n🎉 All tests complete! Your CDP connection is working!")
-        print("\n📌 Next steps:")
-        print("   1. Fund your account with USDC on Base")
-        print("   2. Execute actual swaps")
-        print("   3. Integrate with your crypto analysis tool")
+        print("\n🎉 Local LLM analysis complete!")
+        print("\n💡 Next: Add price feeds and historical data for better analysis")
 
 if __name__ == "__main__":
     if setup_environment():
-        asyncio.run(test_cdp())
+        asyncio.run(test_cdp_with_local_llm())
     else:
         print("❌ Failed to setup environment")
