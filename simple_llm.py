@@ -8,7 +8,6 @@ class SimpleTradingLLM:
     def __init__(self):
         # Use a tiny, fast model that doesn't require much RAM
         self.model_name = "microsoft/DialoGPT-small"  # Only 300MB!
-        # Alternative: "distilgpt2" (even smaller)
         
         print("🔄 Loading local AI model (this may take a minute first time)...")
         try:
