@@ -1,5 +1,5 @@
+<img width="1085" height="312" alt="image" src="https://github.com/user-attachments/assets/38bf6889-7c22-4194-a745-560a03f1695c" />
 
-## 🚀 Fixed and Formatted `README.md`
 
 ````markdown
 # 💹 Crypto Investment Insights with CDP Trading
